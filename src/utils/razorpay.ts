@@ -1,5 +1,5 @@
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
-const CV_DOWNLOAD_AMOUNT = 9900;
+const CV_DOWNLOAD_AMOUNT = 4900;
 
 type RazorpayPaymentResponse = {
   razorpay_payment_id: string;

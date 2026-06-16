@@ -150,7 +150,7 @@ export const ResumePreview: React.FC = () => {
           disabled={isDownloading}
         >
           <Download size={15} />
-          {isDownloading ? "Processing..." : "Pay ₹99 & Download"}
+          {isDownloading ? "Processing..." : "Pay ₹49 & Download"}
         </button>
       </div>
 
