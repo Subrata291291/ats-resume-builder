@@ -1014,7 +1014,7 @@ button, input, textarea, select {
   }
 
   .toolbar-group {
-    flex: 1 1 100%;
+    /* flex: 1 1 100%; */
     min-width: 0;
   }
 
