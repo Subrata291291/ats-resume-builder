@@ -7,6 +7,7 @@ import { ProjectsForm } from "../components/forms/ProjectsForm";
 import { ResumeUpload } from "../components/ResumeUpload";
 import { ResumePreview } from "../components/ResumePreview";
 import { User, Briefcase, GraduationCap, Code, FolderGit2, Sparkles, FileEdit, Eye } from "lucide-react";
+import ResumeScore from "../components/ResumeScore";
 
 type TabType = "personal" | "experience" | "education" | "skills" | "projects";
 
@@ -43,12 +44,18 @@ export const Builder: React.FC = () => {
     <div className="app-container">
       {/* Premium Header */}
       <header className="app-header">
-        <div className="logo-container">
-          <Sparkles className="logo-icon animate-pulse" />
-          <div className="logo-text">ATS Resume Builder</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div className="logo-container">
+            <Sparkles className="logo-icon animate-pulse" />
+            <div className="logo-text">ATS Resume Builder</div>
+          </div>
+          <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500 }} className="hidden md:block">
+            Easy ATS resume builder for job seekers
+          </div>
         </div>
-        <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500 }} className="hidden md:block">
-          Easy ATS resume builder for job seekers
+
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <ResumeScore />
         </div>
       </header>
 
