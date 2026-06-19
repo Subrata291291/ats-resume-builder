@@ -239,6 +239,52 @@ button, input, textarea, select {
   min-width: 10rem;
 }
 
+/* Dark, slim scrollbars for editor and preview panes */
+.editor-panel,
+.form-grid,
+.upload-panel,
+.preview-panel,
+.preview-canvas-viewport {
+  scrollbar-color: rgba(255,255,255,0.12) transparent; /* Firefox */
+  scrollbar-width: thin;
+}
+
+/* WebKit-based browsers */
+.editor-panel::-webkit-scrollbar,
+.form-grid::-webkit-scrollbar,
+.upload-panel::-webkit-scrollbar,
+.preview-panel::-webkit-scrollbar,
+.preview-canvas-viewport::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.editor-panel::-webkit-scrollbar-track,
+.form-grid::-webkit-scrollbar-track,
+.upload-panel::-webkit-scrollbar-track,
+.preview-panel::-webkit-scrollbar-track,
+.preview-canvas-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor-panel::-webkit-scrollbar-thumb,
+.form-grid::-webkit-scrollbar-thumb,
+.upload-panel::-webkit-scrollbar-thumb,
+.preview-panel::-webkit-scrollbar-thumb,
+.preview-canvas-viewport::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  border: 2px solid rgba(11, 15, 25, 0.6);
+}
+
+.editor-panel::-webkit-scrollbar-thumb:hover,
+.form-grid::-webkit-scrollbar-thumb:hover,
+.upload-panel::-webkit-scrollbar-thumb:hover,
+.preview-panel::-webkit-scrollbar-thumb:hover,
+.preview-canvas-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.12);
+}
+
 .upload-status-badge {
   display: inline-flex;
   align-items: center;

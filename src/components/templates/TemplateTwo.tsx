@@ -10,6 +10,11 @@ export const TemplateTwo: React.FC = () => {
     <div className="template-modern">
       {/* Left Column (Contact & Skills) */}
       <div className="template-modern-left">
+        {personalInfo.profilePhoto && (
+          <div style={{ marginBottom: "0.6rem" }}>
+            <img src={personalInfo.profilePhoto} alt="Profile" style={{ width: 88, height: 88, objectFit: "cover", borderRadius: 8, border: `2px solid ${accentColor}` }} />
+          </div>
+        )}
         <h1 className="resume-name" style={{ color: accentColor, fontSize: "20pt", marginBottom: "0.25rem" }}>
           {personalInfo.fullName.split(" ")[0]}
           {personalInfo.fullName.split(" ").slice(1).length > 0 && (

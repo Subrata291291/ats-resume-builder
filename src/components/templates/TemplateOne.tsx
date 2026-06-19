@@ -52,6 +52,11 @@ export const TemplateOne: React.FC = () => {
   return (
     <div className="template-classic">
       <div className="resume-header">
+        {personalInfo.profilePhoto && (
+          <div style={{ float: "right", marginLeft: 12 }}>
+            <img src={personalInfo.profilePhoto} alt="Profile" style={{ width: 88, height: 88, objectFit: "cover", borderRadius: 8, border: "2px solid rgba(0,0,0,0.06)" }} />
+          </div>
+        )}
         <h1 className="resume-name" style={{ color: accentColor }}>
           {personalInfo.fullName || "Your Full Name"}
         </h1>

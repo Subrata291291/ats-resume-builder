@@ -7,6 +7,7 @@ export interface PersonalInfo {
   linkedin: string;
   github?: string;
   website?: string;
+  profilePhoto?: string; // data URL or public URL
   summary: string;
 }
 
@@ -38,4 +39,4 @@ export interface ResumeData {
   experience: Experience[];
   projects: Project[];
   skills: string[];
-}
+}

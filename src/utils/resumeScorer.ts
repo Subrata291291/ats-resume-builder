@@ -58,6 +58,11 @@ export function scoreResume(data: ResumeData): ScoreResult {
   breakdown.links = linkPoints;
   score += linkPoints;
 
+  // Profile photo bonus (small)
+  const photoPoints = personal.profilePhoto ? 3 : 0;
+  breakdown.photo = photoPoints;
+  score += photoPoints;
+
   // Summary length bonus (max 5)
   const summaryLength = personal.summary ? personal.summary.trim().length : 0;
   const summaryBonus = summaryLength >= 50 && summaryLength <= 300 ? 5 : 0;

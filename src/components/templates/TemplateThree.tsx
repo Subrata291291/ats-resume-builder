@@ -52,6 +52,9 @@ export const TemplateThree: React.FC = () => {
   return (
     <div className="template-tech">
       <div className="resume-header" style={{ marginBottom: "1.25rem", borderBottom: `2px solid ${accentColor}`, paddingBottom: "1rem" }}>
+        {personalInfo.profilePhoto && (
+          <img src={personalInfo.profilePhoto} alt="Profile" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, float: "right", marginLeft: 12, border: `2px solid ${accentColor}` }} />
+        )}
         <h1 className="resume-name" style={{ fontSize: "22pt" }}>
           {personalInfo.fullName || "Your Full Name"}
         </h1>

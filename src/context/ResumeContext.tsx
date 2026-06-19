@@ -24,6 +24,7 @@ const sampleData: ResumeData = {
     linkedin: "linkedin.com/in/alexmorgan",
     github: "github.com/alexmorgan",
     website: "alexmorgan.dev",
+    profilePhoto: "",
     summary: "Dynamic and results-driven Senior Software Engineer with 6+ years of experience designing and implementing scalable web applications. Proficient in React, TypeScript, Node.js, and cloud architectures. Adept at leading engineering squads, optimizing frontend performances by up to 40%, and delivering high-quality, maintainable codebases.",
   },
   experience: [
@@ -79,6 +80,7 @@ const emptyData: ResumeData = {
     linkedin: "",
     github: "",
     website: "",
+    profilePhoto: "",
     summary: "",
   },
   experience: [],
