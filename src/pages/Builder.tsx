@@ -4,6 +4,7 @@ import { ExperienceForm } from "../components/forms/ExperienceForm";
 import { EducationForm } from "../components/forms/EducationForm";
 import { SkillsForm } from "../components/forms/SkillsForm";
 import { ProjectsForm } from "../components/forms/ProjectsForm";
+import { ResumeUpload } from "../components/ResumeUpload";
 import { ResumePreview } from "../components/ResumePreview";
 import { User, Briefcase, GraduationCap, Code, FolderGit2, Sparkles, FileEdit, Eye } from "lucide-react";
 
@@ -67,6 +68,8 @@ export const Builder: React.FC = () => {
               </button>
             ))}
           </div>
+
+          <ResumeUpload />
 
           <div className="editor-content-viewport">{renderActiveForm()}</div>
         </section>
