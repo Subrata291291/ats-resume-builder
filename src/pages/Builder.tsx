@@ -45,10 +45,10 @@ export const Builder: React.FC = () => {
       <header className="app-header">
         <div className="logo-container">
           <Sparkles className="logo-icon animate-pulse" />
-          <div className="logo-text">ATS CV Engine</div>
+          <div className="logo-text">ATS Resume Builder</div>
         </div>
         <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500 }} className="hidden md:block">
-          Optimized for Applicant Tracking Systems
+          Easy ATS resume builder for job seekers
         </div>
       </header>
 
