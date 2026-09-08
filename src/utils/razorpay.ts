@@ -53,46 +53,6 @@ type StartCvPaymentParams = {
   themeColor: string;
 };
 
-const getEnvValue = (key: string) => {
-  const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
-  return env?.[key];
-};
-
-export const shouldUseDemoDownload = () => {
-  const key = getEnvValue("VITE_RAZORPAY_KEY_ID");
-  const endpoint = getEnvValue("VITE_RAZORPAY_ORDER_ENDPOINT");
-  const demoModeEnabled = getEnvValue("VITE_ALLOW_DEMO_DOWNLOAD") === "true";
-
-  return demoModeEnabled || !key || !endpoint;
-};
-
-const parseErrorMessage = async (response: Response) => {
-  const rawText = await response.text();
-
-  if (!rawText) {
-    return `Request failed with status ${response.status}.`;
-  }
-
-  try {
-    const parsed = JSON.parse(rawText) as {
-      message?: string;
-      error?: { message?: string; description?: string };
-      code?: string;
-      data?: { message?: string };
-    };
-
-    return (
-      parsed?.message ||
-      parsed?.error?.message ||
-      parsed?.error?.description ||
-      parsed?.data?.message ||
-      `Request failed with status ${response.status}.`
-    );
-  } catch {
-    return rawText.trim() || `Request failed with status ${response.status}.`;
-  }
-};
-
 const loadRazorpayScript = () =>
   new Promise<void>((resolve, reject) => {
     if (window.Razorpay) {
@@ -121,63 +81,38 @@ const loadRazorpayScript = () =>
   });
 
 const createRazorpayOrder = async (): Promise<RazorpayOrderResponse> => {
-  const orderEndpoint = getEnvValue("VITE_RAZORPAY_ORDER_ENDPOINT");
-
-  if (shouldUseDemoDownload()) {
-    return {
-      id: "demo_order_id",
-      amount: CV_DOWNLOAD_AMOUNT,
-      currency: "INR",
-    };
-  }
+  const orderEndpoint = import.meta.env.VITE_RAZORPAY_ORDER_ENDPOINT as string | undefined;
 
   if (!orderEndpoint) {
     throw new Error("Missing VITE_RAZORPAY_ORDER_ENDPOINT. Add your backend order API URL to .env.");
   }
 
-  try {
-    const response = await fetch(orderEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  const response = await fetch(orderEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount: CV_DOWNLOAD_AMOUNT,
+      currency: "INR",
+      receipt: `cv_${Date.now()}`,
+      notes: {
+        product: "ATS CV PDF Download",
       },
-      body: JSON.stringify({
-        amount: CV_DOWNLOAD_AMOUNT,
-        currency: "INR",
-        receipt: `cv_${Date.now()}`,
-        notes: {
-          product: "ATS CV PDF Download",
-        },
-      }),
-    });
+    }),
+  });
 
-    if (!response.ok) {
-      const message = await parseErrorMessage(response);
-      throw new Error(message || "Unable to create Razorpay order.");
-    }
-
-    const order = (await response.json()) as RazorpayOrderResponse & {
-      message?: string;
-      error?: { message?: string };
-    };
-
-    if (!order.id) {
-      const message = order.message || order.error?.message || "Razorpay order response is missing an order id.";
-      throw new Error(message);
-    }
-
-    return order;
-  } catch (error) {
-    if (shouldUseDemoDownload()) {
-      return {
-        id: "demo_order_id",
-        amount: CV_DOWNLOAD_AMOUNT,
-        currency: "INR",
-      };
-    }
-
-    throw error;
+  if (!response.ok) {
+    throw new Error("Unable to create Razorpay order.");
   }
+
+  const order = (await response.json()) as RazorpayOrderResponse;
+
+  if (!order.id) {
+    throw new Error("Razorpay order response is missing an order id.");
+  }
+
+  return order;
 };
 
 export const startCvDownloadPayment = async ({
@@ -186,17 +121,9 @@ export const startCvDownloadPayment = async ({
   contact,
   themeColor,
 }: StartCvPaymentParams) => {
-  const key = getEnvValue("VITE_RAZORPAY_KEY_ID");
+  const key = import.meta.env.VITE_RAZORPAY_KEY_ID as string | undefined;
 
   if (!key) {
-    if (shouldUseDemoDownload()) {
-      return {
-        razorpay_payment_id: "demo_payment_id",
-        razorpay_order_id: "demo_order_id",
-        razorpay_signature: "demo_signature",
-      } satisfies RazorpayPaymentResponse;
-    }
-
     throw new Error("Missing VITE_RAZORPAY_KEY_ID. Add your Razorpay Key ID to .env.");
   }
 
@@ -233,16 +160,8 @@ export const startCvDownloadPayment = async ({
       handler: (response) => resolve(response),
     });
 
-    checkout.on("payment.failed", (response: unknown) => {
-      const error = response as {
-        error?: {
-          description?: string;
-          code?: string;
-        };
-      };
-
-      const message = error?.error?.description || error?.error?.code || "Payment failed. Please try again.";
-      reject(new Error(message));
+    checkout.on("payment.failed", () => {
+      reject(new Error("Payment failed. Please try again."));
     });
 
     checkout.open();
