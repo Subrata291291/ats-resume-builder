@@ -53,6 +53,19 @@ type StartCvPaymentParams = {
   themeColor: string;
 };
 
+const getEnvValue = (key: string) => {
+  const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
+  return env?.[key];
+};
+
+export const shouldUseDemoDownload = () => {
+  const key = getEnvValue("VITE_RAZORPAY_KEY_ID");
+  const endpoint = getEnvValue("VITE_RAZORPAY_ORDER_ENDPOINT");
+  const demoModeEnabled = getEnvValue("VITE_ALLOW_DEMO_DOWNLOAD") === "true";
+
+  return demoModeEnabled || !key || !endpoint;
+};
+
 const parseErrorMessage = async (response: Response) => {
   const rawText = await response.text();
 
@@ -108,43 +121,63 @@ const loadRazorpayScript = () =>
   });
 
 const createRazorpayOrder = async (): Promise<RazorpayOrderResponse> => {
-  const orderEndpoint = import.meta.env.VITE_RAZORPAY_ORDER_ENDPOINT as string | undefined;
+  const orderEndpoint = getEnvValue("VITE_RAZORPAY_ORDER_ENDPOINT");
+
+  if (shouldUseDemoDownload()) {
+    return {
+      id: "demo_order_id",
+      amount: CV_DOWNLOAD_AMOUNT,
+      currency: "INR",
+    };
+  }
 
   if (!orderEndpoint) {
     throw new Error("Missing VITE_RAZORPAY_ORDER_ENDPOINT. Add your backend order API URL to .env.");
   }
 
-  const response = await fetch(orderEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      amount: CV_DOWNLOAD_AMOUNT,
-      currency: "INR",
-      receipt: `cv_${Date.now()}`,
-      notes: {
-        product: "ATS CV PDF Download",
+  try {
+    const response = await fetch(orderEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        amount: CV_DOWNLOAD_AMOUNT,
+        currency: "INR",
+        receipt: `cv_${Date.now()}`,
+        notes: {
+          product: "ATS CV PDF Download",
+        },
+      }),
+    });
 
-  if (!response.ok) {
-    const message = await parseErrorMessage(response);
-    throw new Error(message || "Unable to create Razorpay order.");
+    if (!response.ok) {
+      const message = await parseErrorMessage(response);
+      throw new Error(message || "Unable to create Razorpay order.");
+    }
+
+    const order = (await response.json()) as RazorpayOrderResponse & {
+      message?: string;
+      error?: { message?: string };
+    };
+
+    if (!order.id) {
+      const message = order.message || order.error?.message || "Razorpay order response is missing an order id.";
+      throw new Error(message);
+    }
+
+    return order;
+  } catch (error) {
+    if (shouldUseDemoDownload()) {
+      return {
+        id: "demo_order_id",
+        amount: CV_DOWNLOAD_AMOUNT,
+        currency: "INR",
+      };
+    }
+
+    throw error;
   }
-
-  const order = (await response.json()) as RazorpayOrderResponse & {
-    message?: string;
-    error?: { message?: string };
-  };
-
-  if (!order.id) {
-    const message = order.message || order.error?.message || "Razorpay order response is missing an order id.";
-    throw new Error(message);
-  }
-
-  return order;
 };
 
 export const startCvDownloadPayment = async ({
@@ -153,9 +186,17 @@ export const startCvDownloadPayment = async ({
   contact,
   themeColor,
 }: StartCvPaymentParams) => {
-  const key = import.meta.env.VITE_RAZORPAY_KEY_ID as string | undefined;
+  const key = getEnvValue("VITE_RAZORPAY_KEY_ID");
 
   if (!key) {
+    if (shouldUseDemoDownload()) {
+      return {
+        razorpay_payment_id: "demo_payment_id",
+        razorpay_order_id: "demo_order_id",
+        razorpay_signature: "demo_signature",
+      } satisfies RazorpayPaymentResponse;
+    }
+
     throw new Error("Missing VITE_RAZORPAY_KEY_ID. Add your Razorpay Key ID to .env.");
   }
 
