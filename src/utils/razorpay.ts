@@ -53,6 +53,33 @@ type StartCvPaymentParams = {
   themeColor: string;
 };
 
+const parseErrorMessage = async (response: Response) => {
+  const rawText = await response.text();
+
+  if (!rawText) {
+    return `Request failed with status ${response.status}.`;
+  }
+
+  try {
+    const parsed = JSON.parse(rawText) as {
+      message?: string;
+      error?: { message?: string; description?: string };
+      code?: string;
+      data?: { message?: string };
+    };
+
+    return (
+      parsed?.message ||
+      parsed?.error?.message ||
+      parsed?.error?.description ||
+      parsed?.data?.message ||
+      `Request failed with status ${response.status}.`
+    );
+  } catch {
+    return rawText.trim() || `Request failed with status ${response.status}.`;
+  }
+};
+
 const loadRazorpayScript = () =>
   new Promise<void>((resolve, reject) => {
     if (window.Razorpay) {
@@ -103,13 +130,18 @@ const createRazorpayOrder = async (): Promise<RazorpayOrderResponse> => {
   });
 
   if (!response.ok) {
-    throw new Error("Unable to create Razorpay order.");
+    const message = await parseErrorMessage(response);
+    throw new Error(message || "Unable to create Razorpay order.");
   }
 
-  const order = (await response.json()) as RazorpayOrderResponse;
+  const order = (await response.json()) as RazorpayOrderResponse & {
+    message?: string;
+    error?: { message?: string };
+  };
 
   if (!order.id) {
-    throw new Error("Razorpay order response is missing an order id.");
+    const message = order.message || order.error?.message || "Razorpay order response is missing an order id.";
+    throw new Error(message);
   }
 
   return order;
@@ -160,8 +192,16 @@ export const startCvDownloadPayment = async ({
       handler: (response) => resolve(response),
     });
 
-    checkout.on("payment.failed", () => {
-      reject(new Error("Payment failed. Please try again."));
+    checkout.on("payment.failed", (response: unknown) => {
+      const error = response as {
+        error?: {
+          description?: string;
+          code?: string;
+        };
+      };
+
+      const message = error?.error?.description || error?.error?.code || "Payment failed. Please try again.";
+      reject(new Error(message));
     });
 
     checkout.open();
